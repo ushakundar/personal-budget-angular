@@ -8,8 +8,8 @@ body {
 }
 
 nav {
-    width: 170%;
-    background-color: #4d5791;
+    width: 100%;
+    background-color: #0f30ec;
     height: 44px;
     padding: 0 40px;
 }
@@ -28,21 +28,20 @@ nav ul li a {
     line-height: 44px;
     font-size: 1.4em;
     text-decoration: none;
-    color: #fff;
+    color: #8e8282;
     margin: 0;
 }
 
 nav ul li a:hover  {
     background-color: white;
-    color: #4d5791;
+    color: #82578d;
 }
 
 div.hero {
-    width:128%;
     height: 350px;
-    background-color: #b4c6f0;
+    background-color: #b4f0ec;
     background-image: url('bg.png');
-    background-size: 520px;
+    background-size: 400px;
     background-repeat: no-repeat;
     background-position: center bottom;
     padding-top: 40px;
@@ -61,30 +60,24 @@ div.hero h1 {
 }
 
 div.hero h2 {
-    color: #4d5791;
+    color: #4d917d;
 }
 
 main {
     padding: 40px;
-    width: 150%;
+    width: 100%;
 }
 
 .page-area {
-    max-width: 860px;
+    max-width: 768px;
     display: inline-block;
 }
 
 footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%; /* Ensure it spans the full width of the screen */
-    height: 10px;
-    background-color: #d859d8;
+    height: 50px;
+    background-color: #72795c;
     padding: 40px;
-    box-sizing: border-box; /* Ensures padding doesn't increase the footer's size */
 }
-
 
 .skip {
     display: block;
@@ -103,8 +96,8 @@ footer {
 
 main article {
     display: inline-block;
-    width: 150%;
-    max-width: 380px;
+    width: 100%;
+    max-width: 340px;
     text-align: justify;
     margin: 20px;
 }

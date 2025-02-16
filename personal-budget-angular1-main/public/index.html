@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Budget</title>
+    <meta name="description" content="A free personal budget app">
+    <meta name="keywords" content="app free budget finance">
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="main.css">
+
+    <style>
+        /* Accessibility improvements */
+        h1 { font-size: 23px; }
+        i { color: #003dcc; } 
+        footer { background-color: #b8bcaf; }
+
+        svg {
+            width: 100vw;
+            height: 100vh;
+            margin-left: 19vw;
+        }
+
+        polyline {
+            stroke: rgb(35, 5, 125);
+            opacity: 0.8;
+            stroke-width: 3.5px;
+            fill: none;
+        }
+    </style>
+</head>
+<body>
+
+<a href="#main" class="skip">Skip to content</a>
+
+    <nav>
+        <ul>
+            <li><a href="/">Welcome page</a></li>
+            <li><a href="/about.html">About</a></li>
+            <li><a href="/login.html">Login</a></li>
+            <li><a href="https://google.com">Google</a></li>
+        </ul>
+    </nav>
+
+    <div class="hero">
+        <h1>Personal Budget</h1>
+        <h2>A personal-budget management app</h2>
+    </div>
+
+    <main class="center" id="main">
+
+        <div class="page-area">
+            <article>
+                <h1>Stay on Track</h1>
+                <p>
+                    Do you know where you are spending your money? Proper budget management depends on real data... 
+                    and this app will help you with that!
+                </p>
+            </article>
+    
+            <article>
+                <h1>Free</h1>
+                <p>
+                    This app is <sub>free</sub>! You are the only one holding your <sup>data</sup>!
+                </p>
+            </article>
+    
+            <article>
+                <h1>Alerts</h1>
+                <p>
+                    What if your clothing budget ends? You will get an alert! The goal is to never go over the budget.
+                </p>
+            </article>
+    
+            <article>
+                <h1>Results</h1>
+                <p>
+                    People who stick to a financial plan get out of debt faster! They live happier lives since they 
+                    spend without guilt or fear—because they know it is all accounted for.
+                </p>
+            </article>
+    
+            <article>
+                <h1>Chart</h1>
+                <canvas id="myChart" width="400" height="400"></canvas>
+            </article>
+        </div>
+
+    </main>
+
+    <footer class="bottom">
+        <div class="center">
+            All rights reserved &copy; Usha
+        </div>
+    </footer>
+
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" crossorigin="anonymous"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+
+    <script>
+        // Chart.js Budget Chart
+        var dataSource = {
+            datasets: [
+                {
+                    data: [],
+                    backgroundColor: ['#ffcd56', '#ff6384', '#36a2eb', '#fd6b19', '#09ee09', '#3366cc', '#00ff67']
+                }
+            ],
+            labels: []
+        };
+
+        function createChart() {
+            var ctx = document.getElementById('myChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: dataSource
+            });
+        }
+
+        function getBudget() {
+            axios.get('http://localhost:3000/budget')  // Ensure correct endpoint
+                .then(function (res) {
+                    dataSource.labels = res.data.myBudget.map(item => item.title);
+                    dataSource.datasets[0].data = res.data.myBudget.map(item => item.budget);
+                    createChart();
+                })
+                .catch(function (error) {
+                    console.error("Error fetching budget data:", error);
+                });
+        }
+
+        getBudget();
+
+        // D3.js Pie Chart
+        var svg = d3.select("body").append("svg").append("g");
+        svg.append("g").attr("class", "slices");
+        svg.append("g").attr("class", "labels");
+        svg.append("g").attr("class", "lines");
+
+        var width = 960, height = 450, radius = Math.min(width, height) / 2;
+        var pie = d3.layout.pie().sort(null).value(d => d.budget);
+        var arc = d3.svg.arc().outerRadius(radius * 0.8).innerRadius(radius * 0.4);
+        var outerArc = d3.svg.arc().innerRadius(radius * 0.9).outerRadius(radius * 0.9);
+
+        svg.attr("transform", `translate(${width / 2},${height / 2})`);
+        var key = d => d.data.title;
+        var color = d3.scale.ordinal().range(['#ffcd56', '#ff6384', '#36a2eb', '#fd6b19', '#09ee09', '#3366cc', '#00ff67']);
+
+        axios.get('http://localhost:3000/budget')
+            .then(function (res) {
+                var data = res.data.myBudget;
+                updateChart(data);
+            })
+            .catch(function (error) {
+                console.error("Error fetching data:", error);
+            });
+
+        function updateChart(data) {
+            var slice = svg.select(".slices").selectAll("path.slice").data(pie(data), key);
+
+            slice.enter().insert("path").style("fill", d => color(d.data.title)).attr("class", "slice");
+            slice.transition().duration(1000).attrTween("d", function (d) {
+                var interpolate = d3.interpolate(this._current || d, d);
+                this._current = interpolate(0);
+                return t => arc(interpolate(t));
+            });
+            slice.exit().remove();
+
+            var text = svg.select(".labels").selectAll("text").data(pie(data), key);
+            text.enter().append("text").attr("dy", ".35em").text(d => d.data.title);
+            text.exit().remove();
+
+            var polyline = svg.select(".lines").selectAll("polyline").data(pie(data), key);
+            polyline.enter().append("polyline");
+            polyline.transition().duration(1000).attrTween("points", function (d) {
+                var interpolate = d3.interpolate(this._current || d, d);
+                this._current = interpolate(0);
+                return t => {
+                    var d2 = interpolate(t);
+                    var pos = outerArc.centroid(d2);
+                    pos[0] = radius * 0.95 * (d2.startAngle + (d2.endAngle - d2.startAngle) / 2 < Math.PI ? 1 : -1);
+                    return [arc.centroid(d2), outerArc.centroid(d2), pos];
+                };
+            });
+            polyline.exit().remove();
+        }
+    </script>
+</body>
+</html>
